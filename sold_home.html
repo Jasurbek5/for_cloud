@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UyBozor - Ko'chmas mulk portali</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .listing-card:hover {
+            transform: translateY(-5px);
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const RealEstateDemo = () => {
+            const [filter, setFilter] = useState('Barchasi');
+            const [searchQuery, setSearchQuery] = useState('');
+            const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+            // Ma'lumotlar
+            const listings = [
+                { id: 1, type: 'Sotiladi', title: '3 xonali kvartira, Tashkent City', price: '120,000$', area: '85 m²', location: 'Shayxontohur', img: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=600&q=80' },
+                { id: 2, type: 'Ijaraga', title: '2 xonali uy, Yunusobod', price: '600$/oy', area: '60 m²', location: 'Yunusobod 4-kvartal', img: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=600&q=80' },
+                { id: 3, type: 'Sotiladi', title: 'Yevro-dom, Mirzo Ulugbek', price: '250,000$', area: '200 m²', location: 'Qora-suv', img: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=80' },
+                { id: 4, type: 'Ijaraga', title: 'Studio kvartira, Chilonzor', price: '450$/oy', area: '40 m²', location: 'Novza metro', img: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=600&q=80' },
+                { id: 5, type: 'Sotiladi', title: 'Hovli, Nazarbek', price: '85,000$', area: '400 m²', location: 'Zangiota', img: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=600&q=80' },
+                { id: 6, type: 'Ijaraga', title: 'Premium Kvartira, Oybek', price: '1,200$/oy', area: '110 m²', location: 'Mirobod', img: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=80' },
+
+                // Yangi qo'shilgan ma'lumotlar
+                { id: 7, type: 'Sotiladi', title: 'Gidrometeorologiya yonida 4 xonali', price: '145,000$', area: '105 m²', location: 'Yunusobod', img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80' },
+                { id: 8, type: 'Ijaraga', title: 'Hovli, Qibray tumani', price: '800$/oy', area: '500 m²', location: 'Toshkent viloyati', img: 'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?auto=format&fit=crop&w=600&q=80' },
+                { id: 9, type: 'Sotiladi', title: '2 xonali kvartira, Sergeli', price: '55,000$', area: '52 m²', location: 'Sergeli-7', img: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=600&q=80' },
+                { id: 10, type: 'Ijaraga', title: 'Ofis maydoni, Bunyodkor', price: '1,500$/oy', area: '120 m²', location: 'Chilonzor', img: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=600&q=80' },
+                { id: 11, type: 'Sotiladi', title: 'Penthous, Minor', price: '320,000$', area: '180 m²', location: 'Yunusobod', img: 'https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&w=600&q=80' },
+                { id: 12, type: 'Ijaraga', title: '1 xonali kvartira, Buyuk Ipak Yo\'li', price: '350$/oy', area: '35 m²', location: 'Mirzo Ulugbek', img: 'https://images.unsplash.com/photo-1505691938895-1758d7eaa511?auto=format&fit=crop&w=600&q=80' },
+                { id: 13, type: 'Sotiladi', title: 'Yangi qurilgan uy, Olmazor', price: '95,000$', area: '75 m²', location: 'Olmazor Siti', img: 'https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=600&q=80' },
+                { id: 14, type: 'Ijaraga', title: 'Dacha, Bo\'stonliq', price: '200$/kun', area: '600 m²', location: 'Chorvoq', img: 'https://images.unsplash.com/photo-1542718610-a1d656d1884c?auto=format&fit=crop&w=600&q=80' },
+                { id: 15, type: 'Sotiladi', title: '3 xonali kvartira, Parkent', price: '110,000$', area: '92 m²', location: 'Yashnobod', img: 'https://images.unsplash.com/photo-1515263487990-61b07816b324?auto=format&fit=crop&w=600&q=80' }
+            ];
+
+            // Filtrlash logikasi
+            const filteredListings = listings.filter(item => {
+                const matchesFilter = filter === 'Barchasi' || item.type === filter;
+                const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    item.location.toLowerCase().includes(searchQuery.toLowerCase());
+                return matchesFilter && matchesSearch;
+            });
+
+            // Lucide iconlarini yangilash
+            useEffect(() => {
+                lucide.createIcons();
+            }, [filter, searchQuery]);
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Navbar */}
+                    <nav className="bg-white shadow-sm p-4 sticky top-0 z-50">
+                        <div className="max-w-6xl mx-auto flex justify-between items-center">
+                            <h1 className="text-2xl font-bold text-blue-600 flex items-center gap-2">
+                                <i data-lucide="home"></i> UyBozor
+                            </h1>
+
+                            <div className="hidden md:flex gap-8 font-medium text-gray-600">
+                                <a href="#" className="hover:text-blue-600 transition">Asosiy</a>
+                                <a href="#" className="hover:text-blue-600 transition">Sotuv</a>
+                                <a href="#" className="hover:text-blue-600 transition">Ijara</a>
+                                <a href="#" className="hover:text-blue-600 transition">Xizmatlar</a>
+                            </div>
+
+                            <div className="flex items-center gap-4">
+                                <button className="hidden sm:block bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition font-semibold">
+                                    E'lon berish
+                                </button>
+                                <button className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                                    <i data-lucide={isMenuOpen ? "x" : "menu"}></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Mobile Menu */}
+                        {isMenuOpen && (
+                            <div className="md:hidden bg-white border-t mt-4 p-4 flex flex-col gap-4 animate-fade-in">
+                                <a href="#" className="text-gray-600 font-medium">Asosiy</a>
+                                <a href="#" className="text-gray-600 font-medium">Sotuv</a>
+                                <a href="#" className="text-gray-600 font-medium">Ijara</a>
+                                <button className="bg-blue-600 text-white p-2 rounded-lg">E'lon berish</button>
+                            </div>
+                        )}
+                    </nav>
+
+                    {/* Hero Section */}
+                    <div className="bg-blue-700 py-12 md:py-20 px-4 text-center text-white">
+                        <h2 className="text-3xl md:text-5xl font-extrabold mb-4">Orzuingizdagi uyni toping</h2>
+                        <p className="mb-8 text-blue-100 text-lg">O'zbekiston bo'ylab 10,000+ dan ortiq saralangan e'lonlar</p>
+
+                        <div className="max-w-3xl mx-auto bg-white rounded-2xl p-2 shadow-2xl flex flex-col md:flex-row gap-2">
+                            <div className="flex-1 flex items-center px-4 border-b md:border-b-0 md:border-r border-gray-100">
+                                <i data-lucide="search" className="text-gray-400 mr-2"></i>
+                                <input
+                                    type="text"
+                                    placeholder="Qidiruv (shahar, tuman, sarlavha)..."
+                                    className="w-full p-3 text-gray-800 outline-none"
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                            </div>
+                            <button className="bg-orange-500 hover:bg-orange-600 text-white px-10 py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all">
+                                Qidirish
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="max-w-6xl mx-auto p-6">
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+                            <div>
+                                <h3 className="text-2xl font-bold text-gray-800">Saralangan takliflar</h3>
+                                <p className="text-gray-500">Hozirda {filteredListings.length} ta e'lon mavjud</p>
+                            </div>
+
+                            <div className="flex bg-white p-1 rounded-xl shadow-sm border border-gray-200">
+                                {['Barchasi', 'Sotiladi', 'Ijaraga'].map(t => (
+                                    <button
+                                        key={t}
+                                        onClick={() => setFilter(t)}
+                                        className={`px-6 py-2 rounded-lg transition-all font-medium ${filter === t ? 'bg-blue-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-50'}`}
+                                    >
+                                        {t}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Listings Grid */}
+                        {filteredListings.length > 0 ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {filteredListings.map(item => (
+                                    <div key={item.id} className="listing-card bg-white rounded-2xl shadow-sm hover:shadow-2xl overflow-hidden border border-gray-100 flex flex-col">
+                                        <div className="relative overflow-hidden">
+                                            <img src={item.img} alt={item.title} className="w-full h-56 object-cover hover:scale-105 transition-transform duration-500" />
+                                            <span className={`absolute top-4 left-4 px-4 py-1.5 rounded-full text-xs font-bold text-white shadow-lg ${item.type === 'Sotiladi' ? 'bg-red-500' : 'bg-green-500'}`}>
+                                                {item.type}
+                                            </span>
+                                            <button className="absolute top-4 right-4 bg-white/80 p-2 rounded-full hover:bg-white text-gray-700 transition">
+                                                <i data-lucide="heart" size="18"></i>
+                                            </button>
+                                        </div>
+
+                                        <div className="p-5 flex-1 flex flex-col">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <h4 className="font-bold text-gray-800 text-lg leading-tight">{item.title}</h4>
+                                            </div>
+                                            <p className="text-blue-600 font-black text-2xl mb-4">{item.price}</p>
+
+                                            <div className="flex items-center text-gray-500 text-sm gap-2 mb-4">
+                                                <i data-lucide="map-pin" size="16" className="text-red-400"></i>
+                                                <span>{item.location}</span>
+                                            </div>
+
+                                            <div className="mt-auto pt-4 border-t border-gray-50 flex justify-between items-center">
+                                                <div className="flex items-center gap-1 text-gray-600">
+                                                    <i data-lucide="maximize" size="16"></i>
+                                                    <span className="text-sm font-medium">{item.area}</span>
+                                                </div>
+                                                <button className="bg-gray-100 hover:bg-blue-50 text-blue-700 px-4 py-2 rounded-lg font-bold text-sm transition">
+                                                    Batafsil
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-gray-200">
+                                <i data-lucide="search-x" className="mx-auto text-gray-300 mb-4" size="48"></i>
+                                <h3 className="text-xl font-bold text-gray-800">Hech narsa topilmadi</h3>
+                                <p className="text-gray-500">Qidiruv so'zini o'zgartirib ko'ring</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Footer */}
+                    <footer className="bg-gray-900 text-gray-400 py-12 mt-20">
+                        <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-10">
+                            <div>
+                                <h4 className="text-white text-xl font-bold mb-4 flex items-center gap-2">
+                                    <i data-lucide="home"></i> UyBozor
+                                </h4>
+                                <p>O'zbekistondagi eng tezkor va ishonchli ko'chmas mulk platformasi.</p>
+                            </div>
+                            <div>
+                                <h4 className="text-white font-bold mb-4">Bo'limlar</h4>
+                                <ul className="space-y-2">
+                                    <li><a href="#" className="hover:text-white">Sotib olish</a></li>
+                                    <li><a href="#" className="hover:text-white">Ijara</a></li>
+                                    <li><a href="#" className="hover:text-white">Yangi uylar</a></li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 className="text-white font-bold mb-4">Aloqa</h4>
+                                <p>Toshkent, Shayxontohur tumani</p>
+                                <p>Tel: +998 90 123-45-67</p>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<RealEstateDemo />);
+    </script>
+</body>
+
+</html>
