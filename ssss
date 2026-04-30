@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Kutubxona | Zamonaviy Raqamli Kutubxona</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .dark .glass-effect {
+            background: rgba(30, 41, 59, 0.7);
+        }
+        .book-card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        .dark ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 dark:bg-slate-900 dark:text-gray-100 transition-colors duration-300">
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- Sidebar -->
+        <aside class="w-80 bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 flex flex-col h-full transition-colors duration-300 z-20 hidden md:flex">
+            <div class="p-6 border-b border-gray-100 dark:border-slate-700">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white text-xl shadow-lg">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">Online Kutubxona</h1>
+                </div>
+
+                <div class="flex items-center gap-4 p-4 bg-gray-50 dark:bg-slate-700/50 rounded-xl">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-400 to-purple-500 flex items-center justify-center text-white text-lg font-bold shadow-md">
+                        K
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-sm">Kitobxon Foydalanuvchi</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Premium a'zo</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-4 space-y-6">
+                <!-- Stats -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-blue-50 dark:bg-slate-700/50 p-3 rounded-xl text-center">
+                        <div class="text-2xl font-bold text-blue-600 dark:text-blue-400" id="stat-reading">0</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">O'qilmoqda</div>
+                    </div>
+                    <div class="bg-green-50 dark:bg-slate-700/50 p-3 rounded-xl text-center">
+                        <div class="text-2xl font-bold text-green-600 dark:text-green-400" id="stat-finished">0</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">Tugallangan</div>
+                    </div>
+                </div>
+
+                <!-- Shelves -->
+                <div>
+                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 px-2">Mening javonim</h4>
+                    <nav class="space-y-1">
+                        <button onclick="app.filterShelf('all')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors text-left group active-shelf" data-shelf="all">
+                            <i class="fas fa-th-large text-gray-400 group-hover:text-blue-500 transition-colors"></i>
+                            <span class="text-sm font-medium">Barcha kitoblar</span>
+                            <span class="ml-auto text-xs bg-gray-100 dark:bg-slate-700 px-2 py-0.5 rounded-full" id="count-all">0</span>
+                        </button>
+                        <button onclick="app.filterShelf('reading')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors text-left group" data-shelf="reading">
+                            <i class="fas fa-book-reader text-blue-400"></i>
+                            <span class="text-sm font-medium">O'qilmoqda</span>
+                            <span class="ml-auto text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-full" id="count-reading">0</span>
+                        </button>
+                        <button onclick="app.filterShelf('finished')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors text-left group" data-shelf="finished">
+                            <i class="fas fa-check-circle text-green-400"></i>
+                            <span class="text-sm font-medium">O'qib bo'lingan</span>
+                            <span class="ml-auto text-xs bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-2 py-0.5 rounded-full" id="count-finished">0</span>
+                        </button>
+                        <button onclick="app.filterShelf('planned')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors text-left group" data-shelf="planned">
+                            <i class="fas fa-clock text-orange-400"></i>
+                            <span class="text-sm font-medium">Rejadagi</span>
+                            <span class="ml-auto text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 px-2 py-0.5 rounded-full" id="count-planned">0</span>
+                        </button>
+                        <button onclick="app.filterShelf('bookmarks')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors text-left group" data-shelf="bookmarks">
+                            <i class="fas fa-bookmark text-purple-400"></i>
+                            <span class="text-sm font-medium">Xatcho'plar</span>
+                            <span class="ml-auto text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 px-2 py-0.5 rounded-full" id="count-bookmarks">0</span>
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Recent Activity -->
+                <div>
+                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 px-2">So'nggi faoliyat</h4>
+                    <div id="recent-activity" class="space-y-3 px-2">
+                        <p class="text-xs text-gray-400 italic">Hali faoliyat yo'q...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-gray-200 dark:border-slate-700">
+                <button onclick="app.toggleDarkMode()" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-xl transition-colors text-sm font-medium">
+                    <i class="fas fa-moon dark:hidden"></i>
+                    <i class="fas fa-sun hidden dark:block text-yellow-400"></i>
+                    <span class="dark:hidden">Tungi rejim</span>
+                    <span class="hidden dark:block">Kunduzgi rejim</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col h-full overflow-hidden relative">
+            <!-- Mobile Header -->
+            <header class="md:hidden bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 p-4 flex items-center justify-between z-30">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-book-open text-blue-600 text-xl"></i>
+                    <span class="font-bold text-lg">Kutubxona</span>
+                </div>
+                <button onclick="document.querySelector('aside').classList.toggle('hidden'); document.querySelector('aside').classList.toggle('absolute'); document.querySelector('aside').classList.toggle('h-full');" class="p-2">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </header>
+
+            <!-- Top Bar -->
+            <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-700 p-4 md:p-6 z-10">
+                <div class="max-w-7xl mx-auto">
+                    <div class="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center mb-4">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-800 dark:text-white" id="page-title">Kitoblar katalogi</h2>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Bugun nima o'qishni xohlaysiz?</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <select id="sort-select" onchange="app.renderBooks()" class="bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-gray-700 dark:text-gray-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
+                                <option value="newest">Eng yangilari</option>
+                                <option value="rating">Reyting bo'yicha</option>
+                                <option value="az">A-Z</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Search & Filters -->
+                    <div class="flex flex-col lg:flex-row gap-3">
+                        <div class="relative flex-1">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <i class="fas fa-search text-gray-400"></i>
+                            </div>
+                            <input type="text" id="search-input" oninput="app.renderBooks()" class="bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-gray-900 dark:text-white text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-3 transition-all" placeholder="Kitob nomi, muallif yoki mavzu bo'yicha qidirish...">
+                        </div>
+                        <div class="flex gap-2 overflow-x-auto pb-1 lg:pb-0 scrollbar-hide">
+                            <select id="genre-filter" onchange="app.renderBooks()" class="bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-gray-700 dark:text-gray-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 whitespace-nowrap">
+                                <option value="">Barcha janrlar</option>
+                                <option value="Badiiy">Badiiy</option>
+                                <option value="Ilmiy">Ilmiy</option>
+                                <option value="Fantastika">Fantastika</option>
+                                <option value="Tarix">Tarix</option>
+                                <option value="Psixologiya">Psixologiya</option>
+                                <option value="Biznes">Biznes</option>
+                                <option value="Bolalar">Bolalar</option>
+                                <option value="Diniy">Diniy</option>
+                                <option value="She'riyat">She'riyat</option>
+                            </select>
+                            <select id="lang-filter" onchange="app.renderBooks()" class="bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-gray-700 dark:text-gray-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 whitespace-nowrap">
+                                <option value="">Barcha tillar</option>
+                                <option value="O'zbek">O'zbek</option>
+                                <option value="Rus">Rus</option>
+                                <option value="Ingliz">Ingliz</option>
+                            </select>
+                            <select id="format-filter" onchange="app.renderBooks()" class="bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-gray-700 dark:text-gray-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 whitespace-nowrap">
+                                <option value="">Barcha formatlar</option>
+                                <option value="PDF">PDF</option>
+                                <option value="EPUB">EPUB</option>
+                                <option value="Audio">Audio</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Active Filters Display -->
+                    <div id="active-filters" class="flex flex-wrap gap-2 mt-3 empty:hidden"></div>
+                </div>
+            </div>
+
+            <!-- Books Grid -->
+            <div class="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50 dark:bg-slate-900" id="main-scroll">
+                <div class="max-w-7xl mx-auto">
+                    <div id="books-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <!-- Books will be injected here -->
+                    </div>
+                    
+                    <!-- Empty State -->
+                    <div id="empty-state" class="hidden flex flex-col items-center justify-center py-20 text-center">
+                        <div class="w-24 h-24 bg-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-search text-3xl text-gray-400"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300">Kitoblar topilmadi</h3>
+                        <p class="text-gray-500 dark:text-gray-400 max-w-xs mt-2">Qidiruv so'rovingizga mos keladigan kitoblar topilmadi. Boshqa so'z bilan urinib ko'ring.</p>
+                        <button onclick="app.resetFilters()" class="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
+                            Filterni tozalash
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Reader Modal -->
+    <div id="reader-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onclick="app.closeReader()"></div>
+        <div class="absolute inset-x-0 bottom-0 md:inset-0 md:flex md:items-center md:justify-center pointer-events-none">
+            <div class="bg-white dark:bg-slate-800 w-full md:w-[800px] md:h-[90vh] h-[85vh] md:rounded-2xl rounded-t-2xl shadow-2xl flex flex-col pointer-events-auto transform transition-transform duration-300 translate-y-full md:translate-y-0 scale-95 opacity-0" id="reader-content">
+                
+                <!-- Reader Header -->
+                <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-slate-700">
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <button onclick="app.closeReader()" class="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <div class="min-w-0">
+                            <h3 class="font-bold text-gray-800 dark:text-white truncate" id="reader-title">Kitob nomi</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 truncate" id="reader-author">Muallif</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button onclick="app.changeFontSize(-1)" class="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg text-gray-600 dark:text-gray-300" title="Kichraytirish">
+                            <i class="fas fa-font text-xs"></i>
+                        </button>
+                        <button onclick="app.changeFontSize(1)" class="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg text-gray-600 dark:text-gray-300" title="Kattalashtirish">
+                            <i class="fas fa-font text-lg"></i>
+                        </button>
+                        <button onclick="app.toggleReaderTheme()" class="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg text-gray-600 dark:text-gray-300" title="Rejimni o'zgartirish">
+                            <i class="fas fa-adjust"></i>
+                        </button>
+                        <button onclick="app.speakText()" class="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg text-gray-600 dark:text-gray-300" title="Ovozli o'qish">
+                            <i class="fas fa-headphones"></i>
+                        </button>
+                        <button onclick="app.addBookmark()" class="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg text-gray-600 dark:text-gray-300" title="Xatcho'p qo'shish">
+                            <i class="far fa-bookmark"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Reader Body -->
+                <div class="flex-1 overflow-y-auto p-6 md:p-10 bg-white dark:bg-slate-800 transition-colors duration-300" id="reader-scroll-area">
+                    <div id="reader-text" class="prose dark:prose-invert max-w-none text-gray-800 dark:text-gray-200 leading-relaxed transition-all duration-200" style="font-size: 18px;">
+                        <!-- Content -->
+                    </div>
+                </div>
+
+                <!-- Reader Footer -->
+                <div class="p-4 border-t border-gray-200 dark:border-slate-700 flex justify-between items-center bg-gray-50 dark:bg-slate-800/50 rounded-b-2xl">
+                    <span class="text-xs text-gray-500" id="reader-progress">0% o'qildi</span>
+                    <div class="flex gap-2">
+                        <button onclick="app.addToShelf(app.currentBook.id, 'reading')" class="px-3 py-1.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 transition-colors">
+                            O'qilmoqda
+                        </button>
+                        <button onclick="app.addToShelf(app.currentBook.id, 'finished')" class="px-3 py-1.5 text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg hover:bg-green-200 transition-colors">
+                            Tugallandi
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 transform translate-y-20 opacity-0 transition-all duration-300 z-50 bg-gray-800 dark:bg-white text-white dark:text-gray-900 px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3">
+        <i class="fas fa-check-circle text-green-400 dark:text-green-600"></i>
+        <span class="font-medium text-sm" id="toast-message">Amal bajarildi</span>
+    </div>
+
+    <script>
+        // --- Data ---
+        const initialBooks = [
+            { id: 1, title: "Alkimyogar", author: "Paulo Koelyo", genre: "Badiiy", year: 1988, lang: "O'zbek", format: "EPUB", rating: 4.8, pages: 230, content: "Alkimyogar - bu o'z orzulariga ergashish haqidagi mashhur roman. Kitobda cho'pon bola Santyagoning xazinani topish sarguzashtlari tasvirlangan. U Misrdan Ispaniyagacha bo'lgan yo'lda ko'plab saboqlar oladi va o'zining shaxsiy afsonasini topadi. Bu asar millionlab kitobxonlarni ilhomlantirgan va ularning hayotini o'zgartirgan." },
+            { id: 2, title: "1984", author: "Jorj Oruell", genre: "Fantastika", year: 1949, lang: "O'zbek", format: "PDF", rating: 5.0, pages: 350, content: "1984 - totalitar jamiyat haqidagi dahshatli roman. Asarda hamma narsani kuzatuvchi 'Katta birodar' va shaxsiy erkinlikning yo'qligi tasvirlangan. Uinston Smitning qarshilik ko'rsatishga urinishi va sevgi, sadoqat, haqiqat tushunchalarining qanday buzilishi haqida hikoya qiladi." },
+            { id: 3, title: "Atom odatlar", author: "Jeyms Klir", genre: "Psixologiya", year: 2018, lang: "O'zbek", format: "EPUB", rating: 4.9, pages: 280, content: "Atom odatlar - kichik o'zgarishlar katta natijalarga olib kelishi haqidagi amaliy qo'llanma. Har kuni 1% yaxshilanish sizni muvaffaqiyatga olib boradi. Kitobda odatlarning qanday shakllanishi, ularni qanday o'zgartirish va yangi yaxshi odatlarni qandal shakllantirish haqida batafsil yoritilgan." },
+            { id: 4, title: "The Great Gatsby", author: "F. Scott Fitzgerald", genre: "Badiiy", year: 1925, lang: "Ingliz", format: "PDF", rating: 4.5, pages: 200, content: "The Great Gatsby - Amerikaning jazz davri haqidagi klassik roman. Boylar va orzular haqida hikoya. Jay Gatsbyning boylik va sevgi orzulari, ammo ichki bo'shliq va yolg'on haqidagi tragik hikoya. Bu asar Amerikan orzu tushunchasining tanqidiy tahlili hisoblanadi." },
+            { id: 5, title: "Sapiens", author: "Yuval Noah Harari", genre: "Tarix", year: 2011, lang: "O'zbek", format: "Audio", rating: 4.7, pages: 450, content: "Sapiens - insoniyatning qisqacha tarixi. Odamzodning evolyutsiyasi va jamiyat taraqqiyoti haqida. Homo sapiensning dunyoda ustunlik qilishining sirlari, dehqonchilik inqilobi, dinlar, imperiyalar va ilm-fanning rivojlanishi yoritilgan." },
+            { id: 6, title: "Dumboq", author: "Tohir Malik", genre: "Badiiy", year: 2005, lang: "O'zbek", format: "EPUB", rating: 4.6, pages: 400, content: "Dumboq - o'zbek adabiyotining mashhur romani. Shaytanat va yovuzlikka qarshi kurash. Asarda insoniy fazilatlar, muhabbat va adolat timsoli bo'lgan qahramonlarning hayoti tasvirlangan." },
+            { id: 7, title: "O'tkan kunlar", author: "Abdulla Qodiriy", genre: "Badiiy", year: 1922, lang: "O'zbek", format: "PDF", rating: 4.9, pages: 380, content: "O'tkan kunlar - o'zbek milliy romanining sardori. XIX asr oxiri - XX asr boshidagi Toshkent hayoti, an'analar va zamonaviy o'zgarishlar o'rtasidagi ziddiyatlar tasvirlangan. Asar o'zbek adabiyotining eng yuksak cho'qqilaridan biri hisoblanadi." },
+            { id: 8, title: "Mehrobdan chayon", author: "Abdulla Qodiriy", genre: "Badiiy", year: 1928, lang: "O'zbek", format: "EPUB", rating: 4.8, pages: 320, content: "Mehrobdan chayon - o'zbek adabiyotining yana bir durdonasi. Asarda feudol tuzumning tanqidi, ayollar ozodligi va ilm-ma'rifat g'oyalari yoritilgan. Qahramonlarning taqdiri orqali muallif jamiyatdagi adolatsizliklarni fosh etadi." },
+            { id: 9, title: "Cholpon", author: "Odil Yoqubov", genre: "Tarix", year: 1988, lang: "O'zbek", format: "PDF", rating: 4.7, pages: 500, content: "Cholpon - buyuk o'zbek shoiri va jamoat arbobi Abdulhamid Cholponning hayoti va ijodi haqida batafsil hikoya. Asar shoirning bolaligi, yoshligi, ijodiy faoliyati va tragik taqdiri haqida so'z yuritadi." },
+            { id: 10, title: "Ikki eshik orasi", author: "O'tkir Hoshimov", genre: "Badiiy", year: 1988, lang: "O'zbek", format: "EPUB", rating: 4.9, pages: 350, content: "Ikki eshik orasi - zamonaviy o'zbek adabiyotining eng mashhur asarlaridan biri. Asarda ikki turmush, ikki dunyo o'rtasidagi ziddiyatlar tasvirlangan. Insoniy munosabatlar, muhabbat, sadoqat va xiyonat mavzulari chuqur talqin etilgan." },
+            { id: 11, title: "Ufq", author: "Said Ahmad", genre: "Badiiy", year: 1981, lang: "O'zbek", format: "PDF", rating: 4.6, pages: 280, content: "Ufq - o'zbek sovet davri adabiyotining yetakchi asarlaridan biri. Asarda insonning ma'naviy qidirishlari, orzulari va haqiqat o'rtasidagi ziddiyatlar tasvirlangan." },
+            { id: 12, title: "Yulduzli tunlar", author: "Pirimqul Qodirov", genre: "Tarix", year: 1972, lang: "O'zbek", format: "EPUB", rating: 4.8, pages: 600, content: "Yulduzli tunlar - Amir Temur haqidagi tarixiy roman. Buyuk sarkardaning hayoti, janglari va davlat qurish faoliyati badiiy uslubda hikoya qilingan. Asar o'zbek xalqining tarixiy xotirasini tiklashda katta rol o'ynagan." },
+            { id: 13, title: "Otamdan qolgan dalalar", author: "Tog'ay Murod", genre: "Badiiy", year: 1998, lang: "O'zbek", format: "PDF", rating: 4.7, pages: 250, content: "Otamdan qolgan dalalar - zamonaviy o'zbek nasrining yorqin namunasi. Asarda o'zbek milliy ruhining, an'analarining va zamonaviy hayotning uyg'unlashuvi tasvirlangan." },
+            { id: 14, title: "Kecha va kunduz", author: "Cho'lpon", genre: "Badiiy", year: 1935, lang: "O'zbek", format: "EPUB", rating: 4.9, pages: 300, content: "Kecha va kunduz - o'zbek adabiyotining durdonasi. Asarda insoniy taqdirlar, sevgi va qayg'ular, hayotning go'zalliklari va zardablari badiiy tilda ifodalangan." },
+            { id: 15, title: "Sariq devni minib", author: "Xudoyberdi To'xtaboyev", genre: "Bolalar", year: 1975, lang: "O'zbek", format: "PDF", rating: 4.8, pages: 150, content: "Sariq devni minib - o'zbek bolalar adabiyotining eng sevimli asarlaridan biri. Bolalarning sarguzashtlari, do'stlik va jasorat haqida qiziqarli hikoyalar." },
+            { id: 16, title: "Shum bola", author: "G'afur G'ulom", genre: "Bolalar", year: 1936, lang: "O'zbek", format: "EPUB", rating: 4.9, pages: 120, content: "Shum bola - o'zbek bolalar she'riyatining shoh asari. Shum bolaning sarguzashtlari, tabiat go'zalliklari va bolalikning bebaho lahzalari she'riy tilda ifodalangan." },
+            { id: 17, title: "Qo'shiqlarim sizga", author: "Erkin Vohidov", genre: "She'riyat", year: 1985, lang: "O'zbek", format: "PDF", rating: 4.8, pages: 200, content: "Qo'shiqlarim sizga - o'zbek she'riyatining yetakchi namoyandasi Erkin Vohidovning she'rlar to'plami. Muhabbat, Vatan tabiati va insoniy tuyg'ular haqida go'zal she'rlar." },
+            { id: 18, title: "O'zbek she'riyati antologiyasi", author: "Turli mualliflar", genre: "She'riyat", year: 2000, lang: "O'zbek", format: "PDF", rating: 4.9, pages: 800, content: "O'zbek she'riyati antologiyasi - o'zbek she'riyati tarixining eng yaxshi namunalarini o'z ichiga olgan to'plam. Navoiydan zamonaviy shoirlargacha bo'lgan eng sara asarlar." },
+            { id: 19, title: "Zumrad va Qimmat", author: "To'xtaboyev", genre: "Bolalar", year: 1980, lang: "O'zbek", format: "EPUB", rating: 4.7, pages: 180, content: "Zumrad va Qimmat - ikki opa-singilning sarguzashtlari haqida ertak. Yaxshilik va yovuzlik, mehnatsevarlik va dangasalik o'rtasidagi kurash haqida hikoya." },
+            { id: 20, title: "O'zbek xalq ertaklari", author: "Xalq ijodi", genre: "Bolalar", year: 1990, lang: "O'zbek", format: "PDF", rating: 4.9, pages: 250, content: "O'zbek xalq ertaklari - o'zbek xalqining eng qadimgi va sevimli ertaklari to'plami. Aql-idrok, jasorat va mehnat haqida go'zal hikoyalar." },
+            { id: 21, title: "War and Peace", author: "Lev Tolstoy", genre: "Badiiy", year: 1869, lang: "Rus", format: "EPUB", rating: 4.9, pages: 1200, content: "War and Peace - rus adabiyotining eng buyuk asarlaridan biri. Napoleon urushlari davridagi Rossiya hayoti, aristokrat oilalar taqdiri va tarixiy voqealar badiiy tasvirlangan." },
+            { id: 22, title: "Crime and Punishment", author: "Fyodor Dostoevsky", genre: "Badiiy", year: 1866, lang: "Rus", format: "PDF", rating: 4.9, pages: 600, content: "Crime and Punishment - jinoyat va jazo haqidagi psixologik dram. Raskolnikovning jinoyat sodir etishi va uning ruhiy azoblari chuqur psixologik tahlil qilingan." },
+            { id: 23, title: "Anna Karenina", author: "Lev Tolstoy", genre: "Badiiy", year: 1877, lang: "Rus", format: "EPUB", rating: 4.8, pages: 800, content: "Anna Karenina - muhabbat va jamiyat qonun-qoidalar o'rtasidagi ziddiyat haqida tragediya. Anna Kareninaning taqdiri orqali muallif rus aristokratiyasini tanqid qiladi." },
+            { id: 24, title: "The Master and Margarita", author: "Mikhail Bulgakov", genre: "Fantastika", year: 1967, lang: "Rus", format: "PDF", rating: 4.9, pages: 450, content: "The Master and Margarita - fantastika va realizm uyg'unlashgan buyuk asar. Iblisning Moskvaga tashrifi, Pontiy Pilat haqidagi roman va muhabbat haqidagi qatlamli hikoya." },
+            { id: 25, title: "To Kill a Mockingbird", author: "Harper Lee", genre: "Badiiy", year: 1960, lang: "Ingliz", format: "EPUB", rating: 4.9, pages: 350, content: "To Kill a Mockingbird - irqiy adolatsizlik va bolalik haqidagi klassik roman. Attikus Finchning adolat uchun kurashi va uning farzandlari ko'zi bilan dunyo tasviri." },
+            { id: 26, title: "Pride and Prejudice", author: "Jane Austen", genre: "Badiiy", year: 1813, lang: "Ingliz", format: "PDF", rating: 4.8, pages: 300, content: "Pride and Prejudice - muhabbat va jamiyat o'rtasidagi munosabatlar haqida romantik komediya. Elizabet Bennet va mister Darsining murakkab munosabatlari haqida hikoya." },
+            { id: 27, title: "The Catcher in the Rye", author: "J.D. Salinger", genre: "Badiiy", year: 1951, lang: "Ingliz", format: "EPUB", rating: 4.6, pages: 250, content: "The Catcher in the Rye - o'smirlik inqilobi haqidagi roman. Holden Caulfieldning Nyu-Yorkdagi sarguzashtlari va uning kattalar dunyosiga bo'lgan noroziligi." },
+            { id: 28, title: "Brave New World", author: "Aldous Huxley", genre: "Fantastika", year: 1932, lang: "Ingliz", format: "PDF", rating: 4.7, pages: 300, content: "Brave New World - distopik jamiyat haqidagi bashoratli asar. Ilm-fan zafar quchgan, lekin insoniy tuyg'ular va erkinlik yo'qolgan kelajak dunyosi tasvirlangan." },
+            { id: 29, title: "The Hobbit", author: "J.R.R. Tolkien", genre: "Fantastika", year: 1937, lang: "Ingliz", format: "EPUB", rating: 4.9, pages: 350, content: "The Hobbit - fantastik sarguzashtlar haqidagi klassik asar. Bilbo Bagginsning ajdodlar xazinasi uchun yo'lga chiqishi va uchragan g'alati hodisalar." },
+            { id: 30, title: "Fahrenheit 451", author: "Ray Bradbury", genre: "Fantastika", year: 1953, lang: "Ingliz", format: "PDF", rating: 4.7, pages: 200, content: "Fahrenheit 451 - kitoblarni yoqib yuboruvchi kelajak jamiyat haqidagi roman. Guy Montagning vazifasi kitoblarni yoqish, lekin u haqiqatni qidirishni boshlaydi." },
+            { id: 31, title: "Thinking, Fast and Slow", author: "Daniel Kahneman", genre: "Psixologiya", year: 2011, lang: "Ingliz", format: "EPUB", rating: 4.8, pages: 500, content: "Thinking, Fast and Slow - inson fikrlash jarayonlari haqidagi ilmiy asar. Tez va sekin fikrlash tizimlari, xulosa chiqarish xatolari va qaror qabul qilish psixologiyasi." },
+            { id: 32, title: "Man's Search for Meaning", author: "Viktor Frankl", genre: "Psixologiya", year: 1946, lang: "Ingliz", format: "PDF", rating: 4.9, pages: 200, content: "Man's Search for Meaning - logoterapiya asoschisining hayotiy asari. Konlagerdagi hayot, insonning azoblar ichidan ma'no topishi va yashash istagini saqlab qolishi haqida." },
+            { id: 33, title: "The Power of Habit", author: "Charles Duhigg", genre: "Psixologiya", year: 2012, lang: "Ingliz", format: "EPUB", rating: 4.6, pages: 400, content: "The Power of Habit - odatlarning kuchi va ularni qanday o'zgartirish haqida. Individual va jamoaviy odatlarning shakllanishi va transformatsiyasi haqida ilmiy yondashuv." },
+            { id: 34, title: "Rich Dad Poor Dad", author: "Robert Kiyosaki", genre: "Biznes", year: 1997, lang: "Ingliz", format: "PDF", rating: 4.5, pages: 250, content: "Rich Dad Poor Dad - shaxsiy moliyaviy ta'lim haqidagi eng mashhur kitoblardan biri. Boy va kambag'al otalar o'rtasidagi farq, pul haqidagi to'g'ro tushunchalar va investitsiya tamoyillari." },
+            { id: 35, title: "Zero to One", author: "Peter Thiel", genre: "Biznes", year: 2014, lang: "Ingliz", format: "EPUB", rating: 4.7, pages: 220, content: "Zero to One - startaplar va innovatsiyalar haqida. Noldan birgacha bo'lgan yo'l, raqobatdan qochish va monopoliya qurish strategiyalari haqida noyom fikrlar." },
+            { id: 36, title: "The Lean Startup", author: "Eric Ries", genre: "Biznes", year: 2011, lang: "Ingliz", format: "PDF", rating: 4.6, pages: 300, content: "The Lean Startup - zamonaviy startap boshqaruvi haqida. Tez sinash, o'rganish va moslashish orqali muvaffaqiyatli biznes qurish usullari." },
+            { id: 37, title: "Good to Great", author: "Jim Collins", genre: "Biznes", year: 2001, lang: "Ingliz", format: "EPUB", rating: 4.7, pages: 350, content: "Good to Great - yaxshi kompaniyalarni buyuk kompaniyalarga aylantiruvchi omillar haqida. Illik tadqiqotlar asosida ishlangan ilmiy-biznes asari." },
+            { id: 38, title: "Guns, Germs, and Steel", author: "Jared Diamond", genre: "Tarix", year: 1997, lang: "Ingliz", format: "PDF", rating: 4.7, pages: 500, content: "Guns, Germs, and Steel - insoniyat tarixinining turli xil rivojlanishini geografik va ekologik omillar bilan izohlaydi. Nima uchun ba'zi xalqlar boshqa xalqlardan oldin rivojlandi?" },
+            { id: 39, title: "Sapiens", author: "Yuval Noah Harari", genre: "Tarix", year: 2011, lang: "Ingliz", format: "EPUB", rating: 4.8, pages: 450, content: "Sapiens - insoniyatning qisqacha tarixi. Homo sapiensning evolyutsiyasi, dehqonchilik inqilobi, dinlar, imperiyalar va ilm-fanning rivojlanishi haqida." },
+            { id: 40, title: "The Silk Roads", author: "Peter Frankopan", genre: "Tarix", year: 2015, lang: "Ingliz", format: "PDF", rating: 4.6, pages: 600, content: "The Silk Roads - jahon tarixinining markazida Sharq turganini ko'rsatadi. Ipak yo'lining tarixiy ahamiyati va zamonaviy dunyoni shakllantirishdagi roli." },
+            { id: 41, title: "Qur'oni Karim", author: "Alloh kalomi", genre: "Diniy", year: 610, lang: "O'zbek", format: "PDF", rating: 5.0, pages: 600, content: "Qur'oni Karim - Islom dinining muqaddas kitobi. Insoniyatga hidoyat, rahm va barcha sohalarda yo'l-yo'riq ko'rsatuvchi ilohiy kalom." },
+            { id: 42, title: "Hadis va Hayot", author: "Yusuf Qardoviy", genre: "Diniy", year: 2000, lang: "O'zbek", format: "EPUB", rating: 4.9, pages: 400, content: "Hadis va Hayot - Payg'ambarimiz Muhammad (S.A.V)ning hadislarini zamonaviy hayotga tatbiq etish haqida. Diniy va dunyaviy bilimlarning uyg'unligi." },
+            { id: 43, title: "The Alchemist", author: "Paulo Coelho", genre: "Badiiy", year: 1988, lang: "Ingliz", format: "EPUB", rating: 4.8, pages: 200, content: "The Alchemist - o'zining shaxsiy afsonasini topish haqidagi hikoya. Santyago cho'ponining Misrdan Ispaniyagacha bo'lgan sarguzashtlari va hayotiy saboqlar." },
+            { id: 44, title: "The Little Prince", author: "Antoine de Saint", genre: "Bolalar", year: 1943, lang: "Ingliz", format: "PDF", rating: 4.9, pages: 100, content: "The Little Prince - kattalar uchun ertak. Kichik shahzodaning sayyoralari aylanishidagi sarguzashtlari orqali insoniy munosabatlar, muhabbat va do'stlik haqida chuqur fikrlar." },
+            { id: 45, title: "Harry Potter", author: "J.K. Rowling", genre: "Fantastika", year: 1997, lang: "Ingliz", format: "EPUB", rating: 4.9, pages: 400, content: "Harry Potter - sehrli dunyo haqidagi eng mashhur romanlar seriyasi. Sehrgar bolaning Hogwartsdagi o'qishi, do'stlari va qorong'u kuchlar bilan kurashi." },
+            { id: 46, title: "The Lord of the Rings", author: "J.R.R. Tolkien", genre: "Fantastika", year: 1954, lang: "Ingliz", format: "PDF", rating: 4.9, pages: 1200, content: "The Lord of the Rings - o'rta yer haqidagi epik fantastik asar. Yuzuk urushi, qahramonlarning sarguzashtlari va yaxshilikning qorong'u kuchlar ustidan g'alabasi." },
+            { id: 47, title: "Don Quixote", author: "Miguel Cervantes", genre: "Badiiy", year: 1605, lang: "Ingliz", format: "EPUB", rating: 4.7, pages: 900, content: "Don Quixote - idealistik ritsar va uning sadoqatli xizmatkori Sancho Pansaning sarguzashtlari. Haqiqat va xayol o'rtasidagi chegarani ko'rsatuvchi buyuk asar." },
+            { id: 48, title: "Moby Dick", author: "Herman Melville", genre: "Badiiy", year: 1851, lang: "Ingliz", format: "PDF", rating: 4.5, pages: 600, content: "Moby Dick - oq kit haqidagi ov va uning kapitanga aylanishini tasvirlaydi. Tabiat kuchi, insoniyatning mag'rurligi va taqdir haqidagi filosofik roman." },
+            { id: 49, title: "The Great Divorce", author: "C.S. Lewis", genre: "Diniy", year: 1945, lang: "Ingliz", format: "EPUB", rating: 4.6, pages: 150, content: "The Great Divorce - jannat va do'zax haqidagi alegorik asar. Insonning ozod tanlovi va uning abadiy taqdiri haqidagi chuqur fikrlar." },
+            { id: 50, title: "Mere Christianity", author: "C.S. Lewis", genre: "Diniy", year: 1952, lang: "Ingliz", format: "PDF", rating: 4.8, pages: 250, content: "Mere Christianity - Xristian dinining asosiy tamoyillarini mantiqiy va falsafiy jihatdan tushuntiruvchi asar. Imon, axloq va inson tabiati haqida." }
+        ];
+
+        // --- Application Logic ---
+        const app = {
+            books: [],
+            userProfile: {
+                reading: [],
+                finished: [],
+                planned: [],
+                bookmarks: [],
+                notes: []
+            },
+            currentBook: null,
+            currentFontSize: 18,
+            currentShelf: 'all',
+            speech: null,
+
+            init() {
+                this.loadData();
+                this.setupEventListeners();
+                this.renderShelves();
+                this.renderBooks();
+                this.updateStats();
+                this.checkDarkMode();
+            },
+
+            loadData() {
+                const storedBooks = localStorage.getItem('library_books_v2');
+                const storedProfile = localStorage.getItem('user_profile_v2');
+                
+                this.books = storedBooks ? JSON.parse(storedBooks) : [...initialBooks];
+                if (!storedBooks) this.saveBooks();
+                
+                this.userProfile = storedProfile ? JSON.parse(storedProfile) : {
+                    reading: [],
+                    finished: [],
+                    planned: [],
+                    bookmarks: [],
+                    notes: []
+                };
+            },
+
+            saveBooks() {
+                localStorage.setItem('library_books_v2', JSON.stringify(this.books));
+            },
+
+            saveProfile() {
+                localStorage.setItem('user_profile_v2', JSON.stringify(this.userProfile));
+                this.updateStats();
+                this.renderShelves();
+            },
+
+            setupEventListeners() {
+                // Close modal on escape
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') this.closeReader();
+                });
+            },
+
+            // --- Rendering ---
+            renderBooks() {
+                const container = document.getElementById('books-container');
+                const emptyState = document.getElementById('empty-state');
+                const searchTerm = document.getElementById('search-input').value.toLowerCase();
+                const genre = document.getElementById('genre-filter').value;
+                const lang = document.getElementById('lang-filter').value;
+                const format = document.getElementById('format-filter').value;
+                const sort = document.getElementById('sort-select').value;
+
+                let filtered = this.books.filter(book => {
+                    const matchesSearch = book.title.toLowerCase().includes(searchTerm) || 
+                                         book.author.toLowerCase().includes(searchTerm) ||
+                                         book.content.toLowerCase().includes(searchTerm);
+                    const matchesGenre = !genre || book.genre === genre;
+                    const matchesLang = !lang || book.lang === lang;
+                    const matchesFormat = !format || book.format === format;
+                    return matchesSearch && matchesGenre && matchesLang && matchesFormat;
+                });
+
+                // Shelf filtering
+                if (this.currentShelf !== 'all') {
+                    if (this.currentShelf === 'bookmarks') {
+                        const bookmarkedIds = this.userProfile.bookmarks.map(b => b.bookId);
+                        filtered = filtered.filter(b => bookmarkedIds.includes(b.id));
+                    } else {
+                        filtered = filtered.filter(b => this.userProfile[this.currentShelf].includes(b.id));
+                    }
+                }
+
+                // Sorting
+                if (sort === 'newest') filtered.sort((a, b) => b.year - a.year);
+                else if (sort === 'rating') filtered.sort((a, b) => b.rating - a.rating);
+                else if (sort === 'az') filtered.sort((a, b) => a.title.localeCompare(b.title));
+
+                // Update active filters UI
+                this.updateActiveFilters();
+
+                if (filtered.length === 0) {
+                    container.innerHTML = '';
+                    emptyState.classList.remove('hidden');
+                    return;
+                }
+
+                emptyState.classList.add('hidden');
+                container.innerHTML = filtered.map(book => this.createBookCard(book)).join('');
+            },
+
+            createBookCard(book) {
+                const isReading = this.userProfile.reading.includes(book.id);
+                const isFinished = this.userProfile.finished.includes(book.id);
+                const isPlanned = this.userProfile.planned.includes(book.id);
+                
+                let statusBadge = '';
+                if (isReading) statusBadge = `<span class="absolute top-3 right-3 bg-blue-500 text-white text-xs px-2 py-1 rounded-full shadow-lg">O'qilmoqda</span>`;
+                else if (isFinished) statusBadge = `<span class="absolute top-3 right-3 bg-green-500 text-white text-xs px-2 py-1 rounded-full shadow-lg">Tugallangan</span>`;
+                else if (isPlanned) statusBadge = `<span class="absolute top-3 right-3 bg-orange-500 text-white text-xs px-2 py-1 rounded-full shadow-lg">Rejada</span>`;
+
+                const genreColors = {
+                    'Badiiy': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
+                    'Ilmiy': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+                    'Fantastika': 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300',
+                    'Tarix': 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+                    'Psixologiya': 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300',
+                    'Biznes': 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
+                    'Bolalar': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
+                    'Diniy': 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300',
+                    'She\'riyat': 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300'
+                };
+
+                return `
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 book-card-hover border border-gray-100 dark:border-slate-700 overflow-hidden group relative cursor-pointer" onclick="app.openReader(${book.id})">
+                        ${statusBadge}
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-4">
+                                <span class="px-2.5 py-1 rounded-lg text-xs font-semibold ${genreColors[book.genre] || 'bg-gray-100 text-gray-700'}">${book.genre}</span>
+                                <div class="flex items-center gap-1 text-yellow-400">
+                                    <i class="fas fa-star text-sm"></i>
+                                    <span class="text-sm font-bold text-gray-700 dark:text-gray-300">${book.rating}</span>
+                                </div>
+                            </div>
+                            
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">${book.title}</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">${book.author}</p>
+                            
+                            <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 mb-4 leading-relaxed">${book.content.substring(0, 120)}...</p>
+                            
+                            <div class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-slate-700">
+                                <div class="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                                    <span class="flex items-center gap-1"><i class="far fa-calendar"></i> ${book.year}</span>
+                                    <span class="flex items-center gap-1"><i class="far fa-file-alt"></i> ${book.format}</span>
+                                </div>
+                                <span class="text-xs font-medium px-2 py-1 bg-gray-100 dark:bg-slate-700 rounded-md">${book.lang}</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Quick Actions Overlay -->
+                        <div class="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-white dark:from-slate-800 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 justify-center translate-y-2 group-hover:translate-y-0">
+                            <button onclick="event.stopPropagation(); app.addToShelf(${book.id}, 'reading')" class="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-lg transition-transform hover:scale-110" title="O'qilmoqda">
+                                <i class="fas fa-book-reader"></i>
+                            </button>
+                            <button onclick="event.stopPropagation(); app.addToShelf(${book.id}, 'finished')" class="p-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-lg transition-transform hover:scale-110" title="Tugallandi">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button onclick="event.stopPropagation(); app.addToShelf(${book.id}, 'planned')" class="p-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg shadow-lg transition-transform hover:scale-110" title="Rejada">
+                                <i class="fas fa-clock"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            renderShelves() {
+                // Update counts
+                document.getElementById('count-all').textContent = this.books.length;
+                document.getElementById('count-reading').textContent = this.userProfile.reading.length;
+                document.getElementById('count-finished').textContent = this.userProfile.finished.length;
+                document.getElementById('count-planned').textContent = this.userProfile.planned.length;
+                document.getElementById('count-bookmarks').textContent = this.userProfile.bookmarks.length;
+
+                // Update active shelf UI
+                document.querySelectorAll('[data-shelf]').forEach(el => {
+                    if (el.dataset.shelf === this.currentShelf) {
+                        el.classList.add('bg-blue-50', 'dark:bg-blue-900/20', 'text-blue-600', 'dark:text-blue-400');
+                        el.classList.remove('text-gray-700', 'dark:text-gray-200');
+                    } else {
+                        el.classList.remove('bg-blue-50', 'dark:bg-blue-900/20', 'text-blue-600', 'dark:text-blue-400');
+                        el.classList.add('text-gray-700', 'dark:text-gray-200');
+                    }
+                });
+
+                // Update stats
+                document.getElementById('stat-reading').textContent = this.userProfile.reading.length;
+                document.getElementById('stat-finished').textContent = this.userProfile.finished.length;
+
+                // Recent activity
+                const recentContainer = document.getElementById('recent-activity');
+                const recentBooks = [...this.userProfile.reading, ...this.userProfile.finished].slice(-3);
+                if (recentBooks.length > 0) {
+                    recentContainer.innerHTML = recentBooks.map(id => {
+                        const book = this.books.find(b => b.id === id);
+                        if (!book) return '';
+                        const isFinished = this.userProfile.finished.includes(id);
+                        return `
+                            <div class="flex items-center gap-3 text-sm p-2 hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg cursor-pointer" onclick="app.openReader(${id})">
+                                <div class="w-8 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded shadow-sm flex-shrink-0"></div>
+                                <div class="min-w-0">
+                                    <p class="font-medium truncate text-gray-800 dark:text-gray-200">${book.title}</p>
+                                    <p class="text-xs text-gray-500">${isFinished ? 'Tugallangan' : 'O\'qilmoqda'}</p>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            },
+
+            updateStats() {
+                this.renderShelves();
+            },
+
+            updateActiveFilters() {
+                const container = document.getElementById('active-filters');
+                const filters = [];
+                
+                const genre = document.getElementById('genre-filter').value;
+                const lang = document.getElementById('lang-filter').value;
+                const format = document.getElementById('format-filter').value;
+                const search = document.getElementById('search-input').value;
+
+                if (search) filters.push({ type: 'search', label: `Qidiruv: "${search}"` });
+                if (genre) filters.push({ type: 'genre', label: genre });
+                if (lang) filters.push({ type: 'lang', label: lang });
+                if (format) filters.push({ type: 'format', label: format });
+
+                container.innerHTML = filters.map(f => `
+                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                        ${f.label}
+                        <button onclick="app.clearFilter('${f.type}')" class="hover:text-blue-600 dark:hover:text-blue-200">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </span>
+                `).join('');
+            },
+
+            // --- Actions ---
+            filterShelf(shelf) {
+                this.currentShelf = shelf;
+                const titles = {
+                    'all': 'Kitoblar katalogi',
+                    'reading': 'O\'qilayotgan kitoblar',
+                    'finished': 'O\'qib bo\'lingan kitoblar',
+                    'planned': 'Rejadagi kitoblar',
+                    'bookmarks': 'Xatcho\'plar'
+                };
+                document.getElementById('page-title').textContent = titles[shelf];
+                this.renderBooks();
+                this.renderShelves();
+            },
+
+            clearFilter(type) {
+                if (type === 'search') document.getElementById('search-input').value = '';
+                if (type === 'genre') document.getElementById('genre-filter').value = '';
+                if (type === 'lang') document.getElementById('lang-filter').value = '';
+                if (type === 'format') document.getElementById('format-filter').value = '';
+                this.renderBooks();
+            },
+
+            resetFilters() {
+                document.getElementById('search-input').value = '';
+                document.getElementById('genre-filter').value = '';
+                document.getElementById('lang-filter').value = '';
+                document.getElementById('format-filter').value = '';
+                this.renderBooks();
+            },
+
+            addToShelf(bookId, shelfType) {
+                // Remove from other shelves
+                ['reading', 'finished', 'planned'].forEach(s => {
+                    this.userProfile[s] = this.userProfile[s].filter(id => id !== bookId);
+                });
+
+                if (shelfType !== 'remove') {
+                    this.userProfile[shelfType].push(bookId);
+                    this.showToast(`Kitob "${shelfType === 'reading' ? 'O\'qilmoqda' : shelfType === 'finished' ? 'Tugallangan' : 'Rejada'} javoniga qo'shildi`);
+                } else {
+                    this.showToast('Kitob javondan olib tashlandi');
+                }
+
+                this.saveProfile();
+                this.renderBooks();
+            },
+
+            // --- Reader ---
+            openReader(bookId) {
+                const book = this.books.find(b => b.id === bookId);
+                if (!book) return;
+
+                this.currentBook = book;
+                document.getElementById('reader-title').textContent = book.title;
+                document.getElementById('reader-author').textContent = book.author;
+                document.getElementById('reader-text').innerHTML = `<p class="mb-4">${book.content}</p><p class="text-gray-400 italic text-center mt-8">--- Demo kontent tugadi ---</p>`;
+                document.getElementById('reader-text').style.fontSize = this.currentFontSize + 'px';
+                
+                const modal = document.getElementById('reader-modal');
+                const content = document.getElementById('reader-content');
+                modal.classList.remove('hidden');
+                
+                // Animation
+                setTimeout(() => {
+                    content.classList.remove('translate-y-full', 'scale-95', 'opacity-0');
+                    content.classList.add('translate-y-0', 'scale-100', 'opacity-100');
+                }, 10);
+
+                // Check bookmarks
+                this.updateBookmarkIcon();
+            },
+
+            closeReader() {
+                const modal = document.getElementById('reader-modal');
+                const content = document.getElementById('reader-content');
+                
+                content.classList.remove('translate-y-0', 'scale-100', 'opacity-100');
+                content.classList.add('translate-y-full', 'scale-95', 'opacity-0');
+                
+                if (this.speech) window.speechSynthesis.cancel();
+
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    this.currentBook = null;
+                }, 300);
+            },
+
+            changeFontSize(delta) {
+                this.currentFontSize = Math.max(12, Math.min(32, this.currentFontSize + delta));
+                document.getElementById('reader-text').style.fontSize = this.currentFontSize + 'px';
+            },
+
+            toggleReaderTheme() {
+                document.getElementById('reader-scroll-area').classList.toggle('bg-amber-50');
+                document.getElementById('reader-scroll-area').classList.toggle('text-gray-900');
+                document.getElementById('reader-scroll-area').classList.toggle('dark:bg-slate-800');
+                document.getElementById('reader-scroll-area').classList.toggle('dark:text-gray-200');
+            },
+
+            speakText() {
+                if (!this.currentBook) return;
+                if (this.speech) {
+                    window.speechSynthesis.cancel();
+                    this.speech = null;
+                    return;
+                }
+                
+                const text = document.getElementById('reader-text').innerText;
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'uz-UZ';
+                utterance.onend = () => { this.speech = null; };
+                window.speechSynthesis.speak(utterance);
+                this.speech = utterance;
+            },
+
+            addBookmark() {
+                if (!this.currentBook) return;
+                
+                const existing = this.userProfile.bookmarks.find(b => b.bookId === this.currentBook.id);
+                if (existing) {
+                    this.userProfile.bookmarks = this.userProfile.bookmarks.filter(b => b.bookId !== this.currentBook.id);
+                    this.showToast('Xatcho\'p olib tashlandi');
+                } else {
+                    this.userProfile.bookmarks.push({
+                        bookId: this.currentBook.id,
+                        date: new Date().toISOString()
+                    });
+                    this.showToast('Xatcho\'p qo\'shildi');
+                }
+                
+                this.saveProfile();
+                this.updateBookmarkIcon();
+                this.renderBooks();
+            },
+
+            updateBookmarkIcon() {
+                const btn = document.querySelector('#reader-modal .fa-bookmark').parentElement;
+                const isBookmarked = this.userProfile.bookmarks.some(b => b.bookId === this.currentBook?.id);
+                if (isBookmarked) {
+                    btn.innerHTML = '<i class="fas fa-bookmark text-purple-500"></i>';
+                } else {
+                    btn.innerHTML = '<i class="far fa-bookmark"></i>';
+                }
+            },
+
+            // --- Utilities ---
+            toggleDarkMode() {
+                document.documentElement.classList.toggle('dark');
+                const isDark = document.documentElement.classList.contains('dark');
+                localStorage.setItem('darkMode', isDark);
+            },
+
+            checkDarkMode() {
+                if (localStorage.getItem('darkMode') === 'true' || 
+                    (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                }
+            },
+
+            showToast(message) {
+                const toast = document.getElementById('toast');
+                document.getElementById('toast-message').textContent = message;
+                toast.classList.remove('translate-y-20', 'opacity-0');
+                
+                setTimeout(() => {
+                    toast.classList.add('translate-y-20', 'opacity-0');
+                }, 3000);
+            }
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+    </script>
+</body>
+</html>
